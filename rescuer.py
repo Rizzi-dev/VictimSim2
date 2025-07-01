@@ -12,6 +12,8 @@ from vs.abstract_agent import AbstAgent
 from vs.physical_agent import PhysAgent
 from vs.constants import VS
 from abc import ABC, abstractmethod
+from sklearn.cluster import KMeans
+import numpy
 
 
 ## Classe que define o Agente Rescuer com um plano fixo
@@ -24,23 +26,71 @@ class Rescuer(AbstAgent):
         super().__init__(env, config_file)
 
         # Specific initialization for the rescuer
-        self.map = None             # explorer will pass the map
-        self.victims = None         # list of found victims
-        self.plan = []              # a list of planned actions
-        self.plan_x = 0             # the x position of the rescuer during the planning phase
-        self.plan_y = 0             # the y position of the rescuer during the planning phase
-        self.plan_visited = set()   # positions already planned to be visited 
-        self.plan_rtime = self.TLIM # the remaing time during the planning phase
-        self.plan_walk_time = 0.0   # previewed time to walk during rescue
-        self.x = 0                  # the current x position of the rescuer when executing the plan
-        self.y = 0                  # the current y position of the rescuer when executing the plan
-
+        self.map = None               # explorer will pass the map
+        self.victims = None           # list of found victims
+        self.plan = []                # a list of planned actions
+        self.plan_x = 0               # the x position of the rescuer during the planning phase
+        self.plan_y = 0               # the y position of the rescuer during the planning phase
+        self.plan_visited = set()     # positions already planned to be visited 
+        self.plan_rtime = self.TLIM   # the remaing time during the planning phase
+        self.plan_walk_time = 0.0     # previewed time to walk during rescue
+        self.x = 0                    # the current x position of the rescuer when executing the plan
+        self.y = 0                    # the current y position of the rescuer when executing the plan
+        self.clusters = []  # the cluster defined by K-Means
+        self.sequence = []   # the order of rescuing
                 
         # Starts in IDLE state.
         # It changes to ACTIVE when the map arrives
         self.set_state(VS.IDLE)
 
-    
+    def save_cluster_csv(self, cluster, cluster_id):
+        filename = f"./clusters/cluster{cluster_id}.txt"
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for vic_id, values in cluster.items():
+                x, y = values[0]      # x,y coordinates
+                vs = values[1]        # list of vital signals
+                writer.writerow([vic_id, x, y, vs[6], vs[7]])
+
+    def save_sequence_csv(self, sequence, sequence_id):
+        filename = f"./clusters/seq{sequence_id}.txt"
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for id, values in sequence.items():
+                x, y = values[0]      # x,y coordinates
+                vs = values[1]        # list of vital signals
+                writer.writerow([id, x, y, vs[6], vs[7]])
+
+    def clustering(self):
+        """ The rescuer clusters the victims using the K-Means Algorithm.
+            The idea is divide the victims in 4 clusters based on coordinates.
+            @return: a list of clusters where each cluster is a dictionary in the format [vic_id]: ((x,y), [<vs>])
+        """
+        number_of_clusters = 4
+        victim_ids = []
+        coordinates = []
+
+        for vic_ids, (coords, garbage) in self.victims.items():
+            victim_ids.append(vic_ids)
+            coordinates.append(coords)
+
+        if len(self.victims) == 0:
+            return [{} for x in range(number_of_clusters)]
+        
+        if len(coordinates) < number_of_clusters:
+            number_of_clusters = len(coordinates)
+
+        kmeans = KMeans(n_clusters=number_of_clusters, random_state=0, n_init=50)
+        kmeans.fit(coordinates)
+        labels = kmeans.labels_
+
+        self.clusters = [{} for x in range(number_of_clusters)]
+
+        for i in range(len(kmeans.labels_)):
+            label = labels[i]
+            vic_id = victim_ids[i]
+            self.clusters[label][vic_id] = self.victims[vic_id]
+
     def go_save_victims(self, map, victims):
         """ The explorer sends the map containing the walls and
         victims' location. The rescuer becomes ACTIVE. From now,
