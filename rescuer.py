@@ -7,6 +7,7 @@
 
 import os
 import random
+import csv
 from map import Map
 from vs.abstract_agent import AbstAgent
 from vs.physical_agent import PhysAgent
@@ -50,8 +51,8 @@ class Rescuer(AbstAgent):
             for vic_id, values in cluster.items():
                 x, y = values[0]      # x,y coordinates
                 vs = values[1]        # list of vital signals
-                writer.writerow([vic_id, x, y, vs[6], vs[7]])
-
+                writer.writerow([vic_id, x, y, vs[4], vs[5]]) ##5 e 6
+ 
     def save_sequence_csv(self, sequence, sequence_id):
         filename = f"./clusters/seq{sequence_id}.txt"
         with open(filename, 'w', newline='') as csvfile:
@@ -90,6 +91,9 @@ class Rescuer(AbstAgent):
             label = labels[i]
             vic_id = victim_ids[i]
             self.clusters[label][vic_id] = self.victims[vic_id]
+        
+        for cluster_id, cluster in enumerate(self.clusters):
+            self.save_cluster_csv(cluster, cluster_id+1)
 
     def go_save_victims(self, map, victims):
         """ The explorer sends the map containing the walls and
@@ -112,6 +116,8 @@ class Rescuer(AbstAgent):
         #    print(f"{self.NAME} Victim seq number: {seq} at ({x}, {y}) vs: {vital_signals}")
 
         #print(f"{self.NAME} time limit to rescue {self.plan_rtime}")
+
+        self.clustering()
 
         self.__planner()
         print(f"{self.NAME} PLAN")
