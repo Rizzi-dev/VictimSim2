@@ -9,9 +9,17 @@ from sklearn.cluster import KMeans
 from victims_sequencer import Sequencer
 from collections import deque
 import numpy as np
+import csv
 import time
 
+# 👇 Importa os modelos do seu arquivo de treinamento
+from classifier_regressor import train_test_regressor, train_test_classifier
+
 class Rescuer(AbstAgent):
+    # 👇 Modelos estáticos (treinam 1x só)
+    regressor = train_test_regressor("CART")   # Ou "MLP"
+    classifier = train_test_classifier("CART") # Ou "MLP"
+
     def __init__(self, env, config_file, nb_of_explorers, cluster=[]):
         super().__init__(env, config_file)
         self.nb_of_explorers = nb_of_explorers
@@ -30,6 +38,25 @@ class Rescuer(AbstAgent):
         self.x = 0                  
         self.y = 0                  
         self.set_state(VS.IDLE)
+
+    def predict_gravity(self, vital_signals):
+        # vital_signals: (id, x, y, qPA, pulso, fResp)
+        x_input = np.array(vital_signals[3:]).reshape(1, -1)
+        return self.regressor.predict(x_input)[0]
+
+    def predict_class(self, vital_signals):
+        x_input = np.array(vital_signals[3:]).reshape(1, -1)
+        return self.classifier.predict(x_input)[0]
+
+
+    def save_predictions(self):
+        with open("file_predict.txt", "w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["id", "x", "y", "gravity", "class"])  # Cabeçalho opcional
+            for victim_id, (coord, vs) in self.all_victims.items():
+                gravity = self.predict_gravity(vs)
+                label = self.predict_class(vs)
+                writer.writerow([victim_id, coord[0], coord[1], gravity, label])
 
     def cluster_victims(self, victims_positions, n_clusters=4, random_state=42):
         X = np.array(victims_positions)
@@ -58,11 +85,14 @@ class Rescuer(AbstAgent):
                 rescuers[i] = Rescuer(self.get_env(), config_file, 4, [clusters[i]]) 
                 rescuers[i].map = self.map    
 
+            # 🔑 Gera e salva as predições
+            self.save_predictions()
+
             for i, rescuer in enumerate(rescuers):
                 rescuer.victims_rescue_seq()
                 rescuer.planner()
                 rescuer.set_state(VS.ACTIVE)
-    
+
     def divide_victims(self, victims_positions):
         labels, _ = self.cluster_victims(victims_positions)
         victims_group = list(zip(victims_positions, labels.tolist()))
@@ -85,13 +115,11 @@ class Rescuer(AbstAgent):
 
     def get_neighbors(self, node):
         neighbors = []
-
         for direction in range(8):
             dx, dy = AbstAgent.AC_INCR[direction]
             coord = (node[0] + dx, node[1] + dy)
             if self.map.in_map(coord):
                 neighbors.append(coord)
-
         return neighbors
 
     def calculatepath_tovictim(self, start, goal):
@@ -101,7 +129,6 @@ class Rescuer(AbstAgent):
 
         while queue: 
             current = queue.popleft()
-
             if current == goal:
                 path = []
                 while current != start:
@@ -123,7 +150,6 @@ class Rescuer(AbstAgent):
                     queue.append(neighbor)
         return {}
 
-        
     def planner(self):
         prev_goal = (0, 0)
         all_plans = []
@@ -164,10 +190,8 @@ class Rescuer(AbstAgent):
                 if rescued:
                     print(f"{self.NAME} Victim rescued at ({self.x}, {self.y})")
                 else:
-                    print(f"{self.NAME} Plan fail - victim not found at ({self.x}, {self.x})")
+                    print(f"{self.NAME} Plan fail - victim not found at ({self.x}, {self.y})")
         else:
-            print(f"{self.NAME} Plan fail - walk error - agent at ({self.x}, {self.x})")
+            print(f"{self.NAME} Plan fail - walk error - agent at ({self.x}, {self.y})")
 
         return True
-
-

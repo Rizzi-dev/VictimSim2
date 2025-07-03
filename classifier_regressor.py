@@ -5,8 +5,8 @@ from sklearn.metrics import mean_squared_error, accuracy_score, classification_r
 from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.model_selection import cross_validate
 
-df_training = pd.read_csv('D:\Arquivos do Usuário\Desktop\VictimSim2-main\datasets\data_4000v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
-df_testing = pd.read_csv('D:\Arquivos do Usuário\Desktop\VictimSim2-main\datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_training = pd.read_csv('datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_testing = pd.read_csv('datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
 
 def train_test_regressor(type):
     x_train = df_training[['qPA', 'pulso', 'fResp']]
