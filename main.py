@@ -2,35 +2,31 @@ import sys
 import os
 import time
 
-## importa classes
 from vs.environment import Env
-from explorer_dfs import Explorer
-from rescuer import Rescuer
+from maze_explorer import Explorer
+from maze_rescuer import Rescuer
 
 def main(data_folder_name):
-  
-    # Set the path to config files and data files for the environment
     current_folder = os.path.abspath(os.getcwd())
     data_folder = os.path.abspath(os.path.join(current_folder, data_folder_name))
 
-    # Instantiate the environment
     env = Env(data_folder)
-    
-    # config files for the agents
+    maze_width = Env(data_folder).dic['GRID_WIDTH']
+    maze_height = Env(data_folder).dic['GRID_HEIGHT']
+
     rescuer_file = os.path.join(data_folder, "rescuer_1_config.txt")
-    explorer_file = os.path.join(data_folder, "explorer_1_config.txt")
+    master_rescuer = Rescuer(env, rescuer_file, 4)
+
+    filename = f"explorer_config.txt"
+    explorer_file = os.path.join(data_folder, filename)
     
-    # Instantiate agents rescuer and explorer
-    resc = Rescuer(env, rescuer_file)
+    directions = [["down", "left"], ["left", "up"], ["right", "down"], ["up", "right"]]
+    
+    for i in range(1, 5):
+        filename = f"explorer_{i:1d}_config.txt"
+        explorer_file = os.path.join(data_folder, filename)
+        Explorer(env, explorer_file, directions[i-1][0], directions[i-1][1], maze_width, maze_height, master_rescuer)
 
-    # Explorer needs to know rescuer to send the map
-    # that's why rescuer is instatiated before
-    exp = Explorer(env, explorer_file, resc, 0)
-    exp2 = Explorer(env, explorer_file, resc, 2)
-    exp3 = Explorer(env, explorer_file, resc, 4)
-    exp4 = Explorer(env, explorer_file, resc, 6)
-
-    # Run the environment simulator
     env.run()
     
         

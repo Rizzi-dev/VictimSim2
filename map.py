@@ -33,6 +33,12 @@ class Map:
         """ @param coord: a pair (x, y), the key of the dictionary"""
         return self.map_data.get(coord)
 
+    def update(self, another_map):
+        """ Itupdates the current map with the entries of another map.
+            If the keys are identical, the entry of the another map replaces the entry of the current map.
+            @param another_map: other instance of Map """
+        self.map_data.update(another_map.map_data)
+
     def add(self, coord, difficulty, victim_seq, actions_res):
         """ @param coord: a pair (x, y)
             @param difficulty: the degree of difficulty to acess the cell at coord
