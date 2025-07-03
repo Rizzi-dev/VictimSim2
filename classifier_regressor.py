@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
+import sys
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.metrics import mean_squared_error, accuracy_score, classification_report
 from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.model_selection import cross_validate
 
-df_training = pd.read_csv('datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
-df_testing = pd.read_csv('datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_training = pd.read_csv('datasets/data_430v_94x94/env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_testing = pd.read_csv('datasets/data_800v/env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
 
 def train_test_regressor(type):
     x_train = df_training[['qPA', 'pulso', 'fResp']]
@@ -150,10 +151,18 @@ def train_test_classifier(type):
     return best_model[best_idx]
     
 if __name__ == '__main__':
-    cart_regressor = train_test_regressor("CART")
-    mlp_regressor = train_test_regressor("MLP")
+    # Redireciona stdout para um arquivo
+    with open("saida_cart_mlp.txt", "w") as f:
+        sys.stdout = f
 
-    cart_classifier = train_test_classifier("CART")
-    mlp_classifier = train_test_classifier("MLP")
+        cart_regressor = train_test_regressor("CART")
+        mlp_regressor = train_test_regressor("MLP")
+
+        cart_classifier = train_test_classifier("CART")
+        mlp_classifier = train_test_classifier("MLP")
+
+    # Restaura stdout ao terminal
+    sys.stdout = sys.__stdout__
+    print("Logs salvos em 'saida_cart_mlp.txt'")
 
     

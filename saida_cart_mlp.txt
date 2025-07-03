@@ -1,0 +1,164 @@
+Tamanho do dataset de validacao: 430
+Tamanho do dataset de teste: 800
+---------------------------------------------------------
+Configuração 1: max_depth=5, min_samples_leaf=0.25
+
+RMSE médio (treino):     13.3918
+
+RMSE médio (validação): 14.0586
+
+RMSE treino: 13.6345
+RMSE teste: 16.7484
+---------------------------------------------------------
+Configuração 2: max_depth=10, min_samples_leaf=0.1
+
+RMSE médio (treino):     9.1774
+
+RMSE médio (validação): 10.3076
+
+RMSE treino: 9.4625
+RMSE teste: 15.9221
+---------------------------------------------------------
+Configuração 3: max_depth=20, min_samples_leaf=0.05
+
+RMSE médio (treino):     7.0040
+
+RMSE médio (validação): 8.9576
+
+RMSE treino: 7.3935
+RMSE teste: 15.4458
+Tamanho do dataset de validacao: 430
+Tamanho do dataset de teste: 800
+---------------------------------------------------------
+Configuração 1: max_iter=1000, hidden_layer_sizes=5
+
+RMSE médio (treino):     30.9734
+
+RMSE médio (validação): 30.5612
+
+RMSE treino: 26.4570
+RMSE teste: 23.2782
+---------------------------------------------------------
+Configuração 2: max_iter=2000, hidden_layer_sizes=10
+
+RMSE médio (treino):     21.1784
+
+RMSE médio (validação): 21.4865
+
+RMSE treino: 21.1346
+RMSE teste: 27.1098
+---------------------------------------------------------
+Configuração 3: max_iter=3000, hidden_layer_sizes=15
+
+RMSE médio (treino):     18.6104
+
+RMSE médio (validação): 19.4734
+
+RMSE treino: 20.9215
+RMSE teste: 21.0811
+Tamanho do dataset de validacao: 430
+Tamanho do dataset de teste: 800
+---------------------------------------------------------
+Configuração 1: max_depth=5, min_samples_leaf=0.25
+Acurácia média (treino):    0.5488
+Acurácia média (validação): 0.5326
+              precision    recall  f1-score   support
+
+           1     0.8148    0.7395    0.7753       119
+           2     0.5079    0.4706    0.4885       136
+           3     0.0000    0.0000    0.0000        87
+           4     0.4235    0.9432    0.5845        88
+
+    accuracy                         0.5465       430
+   macro avg     0.4366    0.5383    0.4621       430
+weighted avg     0.4728    0.5465    0.4887       430
+
+Acurácia treino:            0.5465
+Acurácia teste:             0.3925
+---------------------------------------------------------
+Configuração 2: max_depth=10, min_samples_leaf=0.1
+Acurácia média (treino):    0.7831
+Acurácia média (validação): 0.7605
+              precision    recall  f1-score   support
+
+           1     0.8800    0.7395    0.8037       119
+           2     0.7436    0.8529    0.7945       136
+           3     0.6768    0.7701    0.7204        87
+           4     0.8933    0.7614    0.8221        88
+
+    accuracy                         0.7860       430
+   macro avg     0.7984    0.7810    0.7852       430
+weighted avg     0.7985    0.7860    0.7877       430
+
+Acurácia treino:            0.7860
+Acurácia teste:             0.3563
+---------------------------------------------------------
+Configuração 3: max_depth=20, min_samples_leaf=0.05
+Acurácia média (treino):    0.8291
+Acurácia média (validação): 0.7907
+              precision    recall  f1-score   support
+
+           1     0.8000    0.9748    0.8788       119
+           2     0.9159    0.7206    0.8066       136
+           3     0.7692    0.6897    0.7273        87
+           4     0.8100    0.9205    0.8617        88
+
+    accuracy                         0.8256       430
+   macro avg     0.8238    0.8264    0.8186       430
+weighted avg     0.8325    0.8256    0.8218       430
+
+Acurácia treino:            0.8256
+Acurácia teste:             0.3412
+Tamanho do dataset de validacao: 430
+Tamanho do dataset de teste: 800
+---------------------------------------------------------
+Configuração 1: max_iter=1000, hidden_layer_sizes=5
+Acurácia média (treino):    0.2023
+Acurácia média (validação): 0.2023
+              precision    recall  f1-score   support
+
+           1     0.5000    0.0084    0.0165       119
+           2     0.0000    0.0000    0.0000       136
+           3     0.2009    0.9885    0.3340        87
+           4     0.0000    0.0000    0.0000        88
+
+    accuracy                         0.2023       430
+   macro avg     0.1752    0.2492    0.0876       430
+weighted avg     0.1790    0.2023    0.0721       430
+
+Acurácia treino:            0.2023
+Acurácia teste:             0.2687
+---------------------------------------------------------
+Configuração 2: max_iter=2000, hidden_layer_sizes=10
+Acurácia média (treino):    0.2500
+Acurácia média (validação): 0.2442
+              precision    recall  f1-score   support
+
+           1     0.0000    0.0000    0.0000       119
+           2     0.0000    0.0000    0.0000       136
+           3     0.3768    0.2989    0.3333        87
+           4     0.2333    0.9545    0.3750        88
+
+    accuracy                         0.2558       430
+   macro avg     0.1525    0.3133    0.1771       430
+weighted avg     0.1240    0.2558    0.1442       430
+
+Acurácia treino:            0.2558
+Acurácia teste:             0.1250
+---------------------------------------------------------
+Configuração 3: max_iter=3000, hidden_layer_sizes=15
+Acurácia média (treino):    0.3186
+Acurácia média (validação): 0.3186
+              precision    recall  f1-score   support
+
+           1     0.5000    0.0084    0.0165       119
+           2     0.3178    1.0000    0.4823       136
+           3     0.0000    0.0000    0.0000        87
+           4     0.0000    0.0000    0.0000        88
+
+    accuracy                         0.3186       430
+   macro avg     0.2044    0.2521    0.1247       430
+weighted avg     0.2389    0.3186    0.1571       430
+
+Acurácia treino:            0.3186
+Acurácia teste:             0.5463
