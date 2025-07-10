@@ -12,11 +12,11 @@ import numpy as np
 import csv
 import time
 
-# 👇 Importa os modelos do seu arquivo de treinamento
+#  Importa os modelos do seu arquivo de treinamento
 from classifier_regressor import train_test_regressor, train_test_classifier
 
 class Rescuer(AbstAgent):
-    # 👇 Modelos estáticos (treinam 1x só)
+    #  Modelos estáticos (treinam 1x só)
     regressor = train_test_regressor("CART")   # Ou "MLP"
     classifier = train_test_classifier("CART") # Ou "MLP"
 
@@ -103,7 +103,7 @@ class Rescuer(AbstAgent):
                 rescuers[i] = Rescuer(self.get_env(), config_file, 4, [clusters[i]]) 
                 rescuers[i].map = self.map    
 
-            # 🔑 Gera e salva as predições
+            # Gera e salva as predições
             self.save_predictions()
 
             for i, rescuer in enumerate(rescuers):
