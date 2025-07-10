@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
-import sys
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.metrics import mean_squared_error, accuracy_score, classification_report
 from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.tree import plot_tree
+from lime.lime_tabular import LimeTabularExplainer
+import matplotlib.pyplot as plt
 
-df_training = pd.read_csv('datasets/data_430v_94x94/env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
-df_testing = pd.read_csv('datasets/data_800v/env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_training = pd.read_csv('D:\Arquivos do Usuário\Desktop\VictimSim2-main\datasets\data_4000v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_testing = pd.read_csv('D:\Arquivos do Usuário\Desktop\VictimSim2-main\datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
 
 def train_test_regressor(type):
     x_train = df_training[['qPA', 'pulso', 'fResp']]
@@ -148,21 +150,108 @@ def train_test_classifier(type):
 
     val_accs = [np.mean(score) for score in vld_scores]
     best_idx = np.argmax(val_accs)
+
+    """
+    fig = plt.figure(figsize=(25, 20))
+    fig.canvas.manager.set_window_title(f"Árvore de decisão - {type}")
+    _ = plot_tree(
+        best_model[best_idx],
+        feature_names=['qPA', 'pulso', 'fResp'],
+        #class_names=['1', '2', '3', '4'],
+        filled=True
+    )
+    plt.show()
+"""
     return best_model[best_idx]
+
+def explain_lime_for_each_class(model_clf, model_reg, x_test, y_test_clf, y_test_reg, prefix=""):
+    from lime.lime_tabular import LimeTabularExplainer
+    
+    feature_names = x_test.columns.tolist()
+
+    explainer_clf = LimeTabularExplainer(
+        training_data=x_test.values,
+        feature_names=feature_names,
+        class_names=["1", "2", "3", "4"],
+        mode='classification'
+    )
+
+    explainer_reg = LimeTabularExplainer(
+        training_data=x_test.values,
+        feature_names=feature_names,
+        mode='regression'
+    )
+
+    for class_label in [1, 2, 3, 4]:
+        idx = np.where(y_test_clf == class_label)[0]
+        if len(idx) == 0:
+            print(f"Nenhuma instância da classe {class_label} encontrada.")
+            continue
+
+        i = idx[0] 
+        print(f"\nClasse {class_label} — Instância {i}")
+
+        exp_clf = explainer_clf.explain_instance(
+            data_row=x_test.values[i],
+            predict_fn=model_clf.predict_proba,
+            num_features=3
+        )
+        exp_clf.save_to_file(f"{prefix.split("_")[0]}-{class_label}-{i}.html")
+
+        print("Explicação do Classificador (LIME):")
+        for feature, weight in exp_clf.as_list():
+            print(f"{feature}: {weight:.4f}")
+
+        exp_reg = explainer_reg.explain_instance(
+            data_row=x_test.values[i],
+            predict_fn=model_reg.predict,
+            num_features=3
+        )
+        exp_reg.save_to_file(f"{"_".join(prefix.split("_")[1:])}-{y_test_reg[i]}-{i}.html")
+
+        print("Explicação do Regressor (LIME):")
+        for feature, weight in exp_reg.as_list():
+            print(f"{feature}: {weight:.4f}")
     
 if __name__ == '__main__':
-    # Redireciona stdout para um arquivo
-    with open("saida_cart_mlp.txt", "w") as f:
-        sys.stdout = f
+    cart_regressor = train_test_regressor("CART")
+    mlp_regressor = train_test_regressor("MLP")
 
-        cart_regressor = train_test_regressor("CART")
-        mlp_regressor = train_test_regressor("MLP")
+    cart_classifier = train_test_classifier("CART")
+    mlp_classifier = train_test_classifier("MLP")
 
-        cart_classifier = train_test_classifier("CART")
-        mlp_classifier = train_test_classifier("MLP")
+    x_test = df_testing[['qPA', 'pulso', 'fResp']]
+    y_test_clf = df_testing['label'].values
+    y_test_reg = df_testing['grav'].values
 
-    # Restaura stdout ao terminal
-    sys.stdout = sys.__stdout__
-    print("Logs salvos em 'saida_cart_mlp.txt'")
+    acc_cart = accuracy_score(y_test_clf, cart_classifier.predict(x_test))
+    acc_mlp = accuracy_score(y_test_clf, mlp_classifier.predict(x_test))
 
+    if acc_cart > acc_mlp:
+        best_clf = cart_classifier
+        prefix_clf = "cart"
+    else:
+        best_clf = mlp_classifier
+        prefix_clf = "mlp"
+
+    rmse_cart = mean_squared_error(y_test_reg, cart_regressor.predict(x_test))
+    rmse_mlp = mean_squared_error(y_test_reg, mlp_regressor.predict(x_test))
+
+    if rmse_cart <= rmse_mlp:
+        best_reg = cart_regressor
+        prefix_reg = "cart"
+    else:
+        best_reg = mlp_regressor
+        prefix_reg = "mlp"
     
+    rmse_cart = mean_squared_error(y_test_reg, cart_regressor.predict(x_test))
+    rmse_mlp = mean_squared_error(y_test_reg, mlp_regressor.predict(x_test))
+
+    explain_lime_for_each_class(
+        model_clf=best_clf,
+        model_reg=best_reg,
+        x_test=x_test,
+        y_test_clf=y_test_clf,
+        y_test_reg=y_test_reg,
+        prefix=f"{prefix_clf}_{prefix_reg}"
+    )
