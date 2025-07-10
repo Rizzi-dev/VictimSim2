@@ -64,6 +64,21 @@ class Rescuer(AbstAgent):
         labels = kmeans.fit_predict(X)
         centroids = kmeans.cluster_centers_
         return labels, centroids
+    
+    def save_clusters(self, clusters):
+        with open("file_clusters.txt", "w") as f:
+            for cluster_id, victims in clusters.items():
+                f.write(f"Cluster {cluster_id}:\n")
+            for v in victims:
+                f.write(f"  {v}\n")
+                f.write("\n")
+                
+    def save_rescue_plan(self):
+        with open(f"file_rescue_plan_{self.NAME}.txt", "w") as f:
+            for step in self.plan:
+                dx, dy, has_victim = step
+                f.write(f"dx={dx}, dy={dy}, victim={has_victim}\n")
+
 
     def sync_explorers(self, explorer_map, victims):
         self.received_maps += 1
@@ -73,6 +88,9 @@ class Rescuer(AbstAgent):
         if self.received_maps == self.nb_of_explorers:
             victims_positions = [coord for coord, _ in self.all_victims.values()]
             clusters = self.divide_victims(victims_positions)
+            self.save_clusters(clusters)
+            
+
 
             rescuers = [None] * 4
             rescuers[0] = self 
@@ -92,6 +110,7 @@ class Rescuer(AbstAgent):
                 rescuer.victims_rescue_seq()
                 rescuer.planner()
                 rescuer.set_state(VS.ACTIVE)
+                rescuer.save_rescue_plan()
 
     def divide_victims(self, victims_positions):
         labels, _ = self.cluster_victims(victims_positions)
