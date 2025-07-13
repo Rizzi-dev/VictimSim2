@@ -6,10 +6,11 @@ from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.model_selection import cross_validate
 from sklearn.tree import plot_tree
 from lime.lime_tabular import LimeTabularExplainer
+from joblib import dump
 import matplotlib.pyplot as plt
 
-df_training = pd.read_csv('datasets/data_4000v/env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
-df_testing = pd.read_csv('datasets/data_800v/env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_training = pd.read_csv('D:\Arquivos do Usuário\Desktop\VictimSim2-main\datasets\data_4000v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
+df_testing = pd.read_csv('D:\Arquivos do Usuário\Desktop\VictimSim2-main\datasets\data_800v\env_vital_signals.txt', header=None, names=['id', 'x', 'y', 'qPA', 'pulso', 'fResp', 'grav', 'label'])
 
 def train_test_regressor(type):
     x_train = df_training[['qPA', 'pulso', 'fResp']]
@@ -196,7 +197,7 @@ def explain_lime_for_each_class(model_clf, model_reg, x_test, y_test_clf, y_test
             predict_fn=model_clf.predict_proba,
             num_features=3
         )
-        # exp_clf.save_to_file(f"{prefix.split("_")[0]}-{class_label}-{i}.html")
+        exp_clf.save_to_file(f"{prefix.split("_")[0]}-{class_label}-{i}.html")
 
         print("Explicação do Classificador (LIME):")
         for feature, weight in exp_clf.as_list():
@@ -207,7 +208,7 @@ def explain_lime_for_each_class(model_clf, model_reg, x_test, y_test_clf, y_test
             predict_fn=model_reg.predict,
             num_features=3
         )
-        # exp_reg.save_to_file(f"{"_".join(prefix.split("_")[1:])}-{y_test_reg[i]}-{i}.html")
+        exp_reg.save_to_file(f"{"_".join(prefix.split("_")[1:])}-{y_test_reg[i]}-{i}.html")
 
         print("Explicação do Regressor (LIME):")
         for feature, weight in exp_reg.as_list():
@@ -255,3 +256,6 @@ if __name__ == '__main__':
         y_test_reg=y_test_reg,
         prefix=f"{prefix_clf}_{prefix_reg}"
     )
+
+    dump(best_reg, 'regressor_treinado.joblib')
+    dump(best_reg, 'classificador_treinado.joblib')
